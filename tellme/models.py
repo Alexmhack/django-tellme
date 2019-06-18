@@ -10,7 +10,7 @@ class Feedback(models.Model):
     url = models.CharField(_('Url'), max_length=255)
     browser = models.TextField(_('Browser'))
     comment = models.TextField(_('Comment'))
-    screenshot = models.ImageField(_('Screenshot'), blank=True, null=True, upload_to="feedbacks/screenshots/")
+    screenshot = models.ImageField(_('Screenshot'), blank=True, null=True, upload_to="tellme/screenshots/")
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("User"), on_delete=models.SET_NULL, blank=True, null=True)
     email = models.EmailField(max_length=254, blank=True, null=True)
