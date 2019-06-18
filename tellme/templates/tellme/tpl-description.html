@@ -1,15 +1,41 @@
 {% load i18n %}
+{% load static %}
+
 <div id="feedback-welcome">
-    <div class="feedback-logo">{% trans 'Feedback' %}</div>
-    <p>{% trans 'Feedback lets you send us suggestions about this site. We welcome problem reports, feature ideas and general comments.' %}</p>
-    {% if not user.is_authenticated %}
-        <p>{% trans 'If you wish to be contacted please leave us your email:' %}</p>
-        <input type='text' name="Email" id="feedback-user-email">
-    {% endif %}
-    <p>{% trans 'Start by writing a brief description:' %}</p>
-    <textarea id="feedback-note-tmp"></textarea>
-    <p>{% trans "Next we'll let you identify areas of the page related to your description." %}</p>
-    <button id="feedback-welcome-next" class="feedback-next-btn feedback-btn-gray">{% trans 'Next' %}</button>
-    <div id="feedback-welcome-error">{% trans 'Please enter a description.' %}</div>
-    <div class="feedback-wizard-close"></div>
+  <div class="feedback-logo mb-3">
+  	<h2 class="h2-responsive">
+    	<img width="30" height="40" src="{% static 'img/logos/ploypex-logo.png' %}">
+  		{% trans 'Feedback' %}
+  	</h2>
+  </div>
+  <h6>
+		{% trans 'Feedback lets you send us suggestions about this site. We welcome problem reports, feature ideas and general comments.' %}
+  </h6>
+  
+  {% if not user.is_authenticated %}
+    <p class="mt-3">
+    	<strong>
+    		<span class="red-text">*</span>{% trans 'If you wish to be contacted please leave us your email:' %}
+    	</strong>
+    </p>
+
+		<div class="md-form">
+		  <input type="email" name="Email" id="feedback-user-email" class="form-control">
+		  <label for="feedback-user-email">Your email</label>
+		</div>
+  {% endif %}
+  
+  <p>
+  	<strong>{% trans 'Start by writing a brief description:' %}</strong>
+  </p>
+
+	<div class="md-form">
+	  <textarea id="feedback-note-tmp" class="md-textarea form-control" rows="3"></textarea>
+	  <label for="feedback-note-tmp">Description</label>
+	</div>
+
+  <p>{% trans "Next we'll let you identify areas of the page related to your description." %}</p>
+  <button id="feedback-welcome-next" class="btn btn-primary">{% trans 'Next' %}</button>
+  <div id="feedback-welcome-error"><strong>{% trans 'Please enter a description.' %}</strong></div>
+  <div class="feedback-wizard-close"></div>
 </div>

@@ -1,24 +1,15 @@
 import json
 from base64 import b64decode
-import importlib
 
 from django.conf import settings
+from django.core.mail import send_mail
+from django.utils.translation import ugettext_lazy as _
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.files.base import ContentFile
 from django.utils.crypto import get_random_string
+from django.urls import reverse
 
 from tellme.forms import FeedbackForm
-from tellme import mail
-
-
-def get_notification_function(path=None):
-    path = path or getattr(settings, 'TELLME_NOTIFICATION_FUNCTION',
-                           'tellme.mail.send_mail')
-    module_path = '.'.join(path.split('.')[:-1])
-    func_name = path.split('.')[-1]
-    module = importlib.import_module(module_path)
-    func = getattr(module, func_name)
-    return func
 
 
 def post_feedback(request):
@@ -34,15 +25,27 @@ def post_feedback(request):
             data = {'url': feedback['url'], 'browser': json.dumps(feedback['browser']), 'comment': feedback['note'],
                         'email': feedback.get('email')}
         imgstr = feedback['img'].split(';base64,')[1]
-        file = {'screenshot': ContentFile(b64decode(imgstr), name="screenshot_" + get_random_string(6) + ".png")}
+        file = {'screenshot': ContentFile(b64decode(imgstr), name="screenshot_" + get_random_string(20) + ".png")}
         form = FeedbackForm(data, file)
         # check whether it's valid:
         if form.is_valid():
             f = form.save()
 
             if hasattr(settings, 'TELLME_FEEDBACK_EMAIL'):
-                send_notif = get_notification_function()
-                send_notif(request, f)
+                message = _("Your site %(host)s received feedback from %(user)s.\n"
+                            "The comments were:\n"
+                            "%(note)s.\n\n"
+                            "See the full feedback content here: %(url)s")\
+                          % {'host': request.get_host(), 'user': str(request.user), 'note': feedback['note'],
+                             'url': request.build_absolute_uri(
+                                 reverse('admin:tellme_feedback_change', args=(f.id,)))}
+                send_mail(
+                        _('[%(host)s] Received feedback') % {'host': request.get_host()},
+                        message,
+                        settings.SERVER_EMAIL,
+                        [settings.TELLME_FEEDBACK_EMAIL],
+                        fail_silently=True)
+
             return JsonResponse({})
         else:
             return JsonResponse({'error': dict(form.errors)})
